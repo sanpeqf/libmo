@@ -1,6 +1,6 @@
 /* SPDX-License-Identifier: GPL-2.0-or-later */
 /*
- * Copyright(c) 2022 Sanpe <sanpeqf@gmail.com>
+ * Copyright(c) 2022 John Sanpe <sanpeqf@gmail.com>
  */
 
 #include <stdlib.h>
@@ -16,9 +16,11 @@ static bool bitmap_full(const unsigned long *bitmap, unsigned int bits)
             return false;
     }
 
-    mask = ULONG_MAX << bits;
-    if ((bitmap[offset] | mask) != ULONG_MAX)
-        return false;
+    if (bits) {
+        mask = ULONG_MAX << bits;
+        if ((bitmap[offset] | mask) != ULONG_MAX)
+            return false;
+    }
 
     return true;
 }

@@ -1,4 +1,8 @@
 /* SPDX-License-Identifier: GPL-2.0-or-later */
+/*
+ * Copyright(c) 2022 John Sanpe <sanpeqf@gmail.com>
+ */
+
 #ifndef _LIBMO_H_
 #define _LIBMO_H_
 
