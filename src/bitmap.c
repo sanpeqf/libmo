@@ -41,11 +41,11 @@ static unsigned long *bitmap_zalloc(unsigned int bits)
     size_t size;
 
     size = (bits + __LONG_WIDTH__ - 1) / __LONG_WIDTH__;
-    bitmap = malloc(size);
+    bitmap = malloc(size * sizeof(*bitmap));
     if (!bitmap)
         return NULL;
 
-    memset(bitmap, 0, size);
+    memset(bitmap, 0, size * sizeof(*bitmap));
     return bitmap;
 }
 
