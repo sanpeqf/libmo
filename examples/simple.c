@@ -14,7 +14,7 @@
 
 /* Define shortcut for gettext(). */
 struct libmo_context moctx;
-#define _(string) (libmo_lookup(&moctx, string, 0, NULL) ?: string)
+#define _(string) libmo_gettext(&moctx, string)
 
 static void load_context(const char *path)
 {

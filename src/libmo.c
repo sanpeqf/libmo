@@ -218,7 +218,7 @@ const char *libmo_lookup(const struct libmo_context *ctx, const char *orig, size
 
     for (;;) {
         retval = get_uint32(ctx, LIBMO_HASH_OFFSET(ctx, entry), &value);
-        if (retval)
+        if (retval || !value)
             return NULL;
 
         msgid = get_string(ctx, LIBMO_ORIG_OFFSET(ctx, value - 1), &msglen);
@@ -241,6 +241,4 @@ const char *libmo_lookup(const struct libmo_context *ctx, const char *orig, size
         else
             entry += incr;
     }
-
-    return NULL;
 }

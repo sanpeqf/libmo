@@ -104,4 +104,10 @@ extern int libmo_load(struct libmo_context *ctx, const void *data, size_t size);
 extern int libmo_verify(const struct libmo_context *ctx);
 extern const char *libmo_lookup(const struct libmo_context *ctx, const char *orig, size_t origlen, size_t *tranlenp);
 
+static inline const char *libmo_gettext(const struct libmo_context *ctx, const char *orig)
+{
+    const char *tran = libmo_lookup(ctx, orig, 0, NULL);
+    return tran ?: orig;
+}
+
 #endif /* _LIBMO_H_ */
