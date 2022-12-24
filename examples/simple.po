@@ -1,0 +1,10 @@
+# SPDX-License-Identifier: GPL-2.0-or-later
+#
+# Copyright(c) 2022 John Sanpe <sanpeqf@gmail.com>
+#
+
+msgid "Hello, world!\n"
+msgstr "你好，世界！\n"
+
+msgid "This program is running as process number %d.\n"
+msgstr "此程序正以进程号 %d 运行。\n"

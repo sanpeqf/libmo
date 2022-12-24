@@ -1,0 +1,21 @@
+name: examples
+on:
+  push:
+    branches: [ master ]
+  pull_request:
+    branches: [ master ]
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v2
+    - name: install packages
+      run:  |
+        sudo apt update
+        sudo apt install gettext
+    - name: make
+      run:  make
+    - name: simple
+      run:  ./examples/simple
+    - name: make clean
+      run:  make clean
