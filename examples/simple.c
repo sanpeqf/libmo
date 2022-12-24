@@ -14,7 +14,7 @@
 
 /* Define shortcut for gettext(). */
 struct libmo_context moctx;
-#define _(string) libmo_lookup(&moctx, string, 0, NULL)
+#define _(string) (libmo_lookup(&moctx, string, 0, NULL) ?: string)
 
 static void load_context(const char *path)
 {
@@ -22,13 +22,13 @@ static void load_context(const char *path)
     void *block;
     int fd;
 
-    if ((fd = open(path, O_RDWR)) < 0)
+    if ((fd = open(path, O_RDONLY)) < 0)
         err(errno, "can not open file");
 
     if (fstat(fd, &stat) < 0)
         err(errno, "fstat error");
 
-    block = mmap(NULL, stat.st_size, PROT_READ | PROT_WRITE, MAP_SHARED, fd, 0);
+    block = mmap(NULL, stat.st_size, PROT_READ, MAP_SHARED, fd, 0);
     if (block == MAP_FAILED)
         err(errno, "mmap error");
 
