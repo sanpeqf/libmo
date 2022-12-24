@@ -4,11 +4,15 @@
  */
 
 #include <libmo.h>
-#include <stdio.h>
 #include <string.h>
 
-#include "bitmap.c"
-#include "pjwhash.c"
+#ifndef lm_error
+# include <stdio.h>
+# define lm_error(fmt, ...) fprintf(stderr, fmt, ##__VA_ARGS__)
+#ifdef LIBMO_DEBUG
+# define lm_debug(fmt, ...) fprintf(stdout, fmt, ##__VA_ARGS__)
+#endif
+#endif
 
 #define swab32(x) ((uint32_t)( \
     (((uint32_t)(x) & (uint32_t)0x000000ffUL) << 24) | \
@@ -19,6 +23,9 @@
 #define LIBMO_SWAB(ctx, value) ( \
     (ctx)->swab ? swab32(value) : (value) \
 )
+
+#include "bitmap.c"
+#include "pjwhash.c"
 
 static inline int load_swab(struct libmo_context *ctx)
 {
@@ -34,7 +41,7 @@ static inline int load_swab(struct libmo_context *ctx)
             break;
 
         default:
-            fprintf(stderr, "%p: file is not in GNU mo format\n", ctx);
+            lm_error("%p: file is not in GNU mo format\n", ctx);
             return -EINVAL;
     }
 
@@ -47,7 +54,7 @@ static int load_context(struct libmo_context *ctx)
     int retval;
 
     if (ctx->size < sizeof(*head)) {
-        fprintf(stderr, "%p: header truncated\n", ctx);
+        lm_error("%p: header truncated\n", ctx);
         return -EFBIG;
     }
 
@@ -58,7 +65,7 @@ static int load_context(struct libmo_context *ctx)
     ctx->minor = LIBMO_SWAB(ctx, head->revision) & 0xffff;
 
     if (ctx->major != 0 && ctx->major != 1) {
-        fprintf(stderr, "%p: unknow revision\n", ctx);
+        lm_error("%p: unknow revision\n", ctx);
         return -EPROTO;
     }
 
@@ -70,14 +77,14 @@ static int load_context(struct libmo_context *ctx)
     ctx->hash_offset = LIBMO_SWAB(ctx, head->hash_offset);
 
     if ((ctx->orig_offset | ctx->tran_offset) % sizeof(uint32_t)) {
-        fprintf(stderr, "%p: unaligned offset\n", ctx);
+        lm_error("%p: unaligned offset\n", ctx);
         return -EADDRNOTAVAIL;
     }
 
     if (ctx->orig_offset + ctx->index_num * sizeof(struct libmo_sdesc) >= ctx->size ||
         ctx->tran_offset + ctx->index_num * sizeof(struct libmo_sdesc) >= ctx->size ||
         ctx->hash_offset + ctx->index_num * sizeof(uint32_t) >= ctx->size) {
-        fprintf(stderr, "%p: offset truncated\n", ctx);
+        lm_error("%p: offset truncated\n", ctx);
         return -EFBIG;
     }
 
@@ -135,7 +142,7 @@ int libmo_verify(const struct libmo_context *ctx)
             return -EINVAL;
 
         if (index && strcmp(prev, msgid) > 0) {
-            fprintf(stderr, "%p: messages array is not sorted\n", ctx);
+            lm_error("%p: messages array is not sorted\n", ctx);
             return -EINVAL;
         }
 
@@ -148,7 +155,7 @@ int libmo_verify(const struct libmo_context *ctx)
 
         /* Verify the hash table size. */
         if (ctx->hash_size < 2) {
-            fprintf(stderr, "%p: hash table size is invalid\n", ctx);
+            lm_error("%p: hash table size is invalid\n", ctx);
             return -EINVAL;
         }
 
@@ -167,13 +174,13 @@ int libmo_verify(const struct libmo_context *ctx)
             if (entry--) {
                 if (entry < ctx->index_num && !bitmap_test_set(bitmap, entry))
                     continue;
-                fprintf(stderr, "%p: hash table contains invalid entries\n", ctx);
+                lm_error("%p: hash table contains invalid entries\n", ctx);
                 return -EINVAL;
             }
         }
 
         if (!bitmap_full(bitmap, ctx->index_num)) {
-            fprintf(stderr, "%p: some messages are not present in hash table\n", ctx);
+            lm_error("%p: some messages are not present in hash table\n", ctx);
             return -EINVAL;
         }
 
@@ -196,7 +203,7 @@ int libmo_verify(const struct libmo_context *ctx)
                     return retval;
 
                 if (!value) {
-                    fprintf(stderr, "%p: some messages are at a wrong index in the hash table\n", ctx);
+                    lm_error("%p: some messages are at a wrong index in the hash table\n", ctx);
                     return -EINVAL;
                 }
 
