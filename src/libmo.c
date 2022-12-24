@@ -34,6 +34,7 @@ static inline int load_swab(struct libmo_context *ctx)
             break;
 
         default:
+            fprintf(stderr, "%p: file is not in GNU mo format\n", ctx);
             return -EINVAL;
     }
 
@@ -45,8 +46,10 @@ static int load_context(struct libmo_context *ctx)
     const struct libmo_header *head = ctx->data;
     int retval;
 
-    if (ctx->size < sizeof(*head))
+    if (ctx->size < sizeof(*head)) {
+        fprintf(stderr, "%p: header truncated\n", ctx);
         return -EFBIG;
+    }
 
     if ((retval = load_swab(ctx)))
         return retval;
@@ -54,8 +57,10 @@ static int load_context(struct libmo_context *ctx)
     ctx->major = LIBMO_SWAB(ctx, head->revision) >> 16;
     ctx->minor = LIBMO_SWAB(ctx, head->revision) & 0xffff;
 
-    if (ctx->major != 0 && ctx->major != 1)
+    if (ctx->major != 0 && ctx->major != 1) {
+        fprintf(stderr, "%p: unknow revision\n", ctx);
         return -EPROTO;
+    }
 
     ctx->index_num = LIBMO_SWAB(ctx, head->index_num);
     ctx->hash_size = LIBMO_SWAB(ctx, head->hash_size);
@@ -64,13 +69,17 @@ static int load_context(struct libmo_context *ctx)
     ctx->tran_offset = LIBMO_SWAB(ctx, head->tran_offset);
     ctx->hash_offset = LIBMO_SWAB(ctx, head->hash_offset);
 
-    if ((ctx->orig_offset | ctx->tran_offset) % sizeof(uint32_t))
+    if ((ctx->orig_offset | ctx->tran_offset) % sizeof(uint32_t)) {
+        fprintf(stderr, "%p: unaligned offset\n", ctx);
         return -EADDRNOTAVAIL;
+    }
 
     if (ctx->orig_offset + ctx->index_num * sizeof(struct libmo_sdesc) >= ctx->size ||
         ctx->tran_offset + ctx->index_num * sizeof(struct libmo_sdesc) >= ctx->size ||
-        ctx->hash_offset + ctx->index_num * sizeof(uint32_t) >= ctx->size)
+        ctx->hash_offset + ctx->index_num * sizeof(uint32_t) >= ctx->size) {
+        fprintf(stderr, "%p: offset truncated\n", ctx);
         return -EFBIG;
+    }
 
     return 0;
 }
