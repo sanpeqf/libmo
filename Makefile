@@ -1,9 +1,12 @@
 # SPDX-License-Identifier: GPL-2.0-or-later
-flags = -g -Wall -Werror -I src/
-head = src/libmo.h src/bitmap.c src/pjwhash.c
-obj = src/libmo.o
-extra = examples/simple.mo
-demo = examples/simple
+flags := -g -Wall -Werror -I src/ -D_GNU_SOURCE -DLIBMO_DEBUG
+head := src/libmo.h src/bitmap.c src/pjwhash.c
+head += examples/helper.c
+obj := src/libmo.o
+demo := examples/simple
+
+extra := $(patsubst ./%,%, $(shell find -name "*.po"))
+extra := $(addsuffix .mo,$(basename $(extra)))
 
 ifeq ("$(origin V)", "command line")
 BUILD_VERBOSE = $V

@@ -17,5 +17,7 @@ jobs:
       run:  make
     - name: simple
       run:  ./examples/simple
+    - name: simple-all
+      run:  ./examples/simple-all.sh
     - name: make clean
       run:  make clean

@@ -1,0 +1,10 @@
+# SPDX-License-Identifier: GPL-2.0-or-later
+# 
+# Copyright(c) 2022-2023 John Sanpe <sanpeqf@gmail.com>
+# 
+
+msgid "Hello, world!"
+msgstr "வணக்கம், உலகு!"
+
+msgid "This program is running as process number %d."
+msgstr "இந்நிரல் செயலாக்க எண் %d ஆக இயங்கிக்கொண்டிருக்கிறது."

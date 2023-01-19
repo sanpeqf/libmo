@@ -3,46 +3,29 @@
  * Copyright(c) 2022 John Sanpe <sanpeqf@gmail.com>
  */
 
-#include <libmo.h>
 #include <stdio.h>
 #include <stdlib.h>
-#include <unistd.h>
-#include <err.h>
-#include <fcntl.h>
-#include <sys/mman.h>
-#include <sys/stat.h>
+#include "helper.c"
 
 /* Define shortcut for gettext(). */
 struct libmo_context moctx;
 #define _(string) libmo_gettext(&moctx, string)
 
-static void load_context(const char *path)
+int main(int argc, char *argv[])
 {
-    struct stat stat;
-    void *block;
-    int fd;
+    char *path, *domain;
 
-    if ((fd = open(path, O_RDONLY)) < 0)
-        err(errno, "can not open file");
+    domain = get_domain();
+    if (strcmp(domain, "C")) {
+        asprintf(&path, "examples/simple-mo/%s.mo", domain);
+        printf("load machine object file: %s\n", path);
+        load_context(&moctx, path);
+        free(path);
+    }
 
-    if (fstat(fd, &stat) < 0)
-        err(errno, "fstat error");
+    printf("%s\n", _("Hello, world!"));
+    printf(_("This program is running as process number %d."), getpid());
+    putchar('\n');
 
-    block = mmap(NULL, stat.st_size, PROT_READ, MAP_SHARED, fd, 0);
-    if (block == MAP_FAILED)
-        err(errno, "mmap error");
-
-    if ((errno = libmo_load(&moctx, block, stat.st_size)))
-        err(errno, "load error");
-
-    if ((errno = libmo_verify(&moctx)))
-        err(errno, "verify error");
-}
-
-int main(void)
-{
-    load_context("examples/simple.mo");
-    printf("%s", _("Hello, world!\n"));
-    printf(_("This program is running as process number %d.\n"), getpid());
     return 0;
 }
