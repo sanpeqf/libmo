@@ -5,14 +5,19 @@
 
 #include <libmo.h>
 #include <string.h>
+#include <stdio.h>
 
 #ifndef lm_error
-# include <stdio.h>
 # define lm_error(fmt, ...) fprintf(stderr, fmt, ##__VA_ARGS__)
+#endif
+
 #ifdef LIBMO_DEBUG
+#ifndef lm_debug
 # define lm_debug(fmt, ...) fprintf(stdout, fmt, ##__VA_ARGS__)
 #endif
-#endif
+#else
+# define lm_debug(fmt, ...)
+#endif /* LIBMO_DEBUG */
 
 #define swab32(x) ((uint32_t)( \
     (((uint32_t)(x) & (uint32_t)0x000000ffUL) << 24) | \
@@ -135,6 +140,9 @@ int libmo_verify(const struct libmo_context *ctx)
     unsigned int index;
     int retval;
 
+    if (!ctx->data)
+        return -EINVAL;
+
     /* Verify that the array of messages is sorted. */
     for (index = 0; index < ctx->index_num; ++index) {
         msgid = get_string(ctx, LIBMO_ORIG_OFFSET(ctx, index), NULL);
@@ -231,6 +239,9 @@ const char *libmo_lookup(const struct libmo_context *ctx, const char *orig, size
     uint32_t hashval, entry, incr, value;
     size_t msglen, tranlen;
     int retval;
+
+    if (!ctx->data)
+        return NULL;
 
     hashval = pjwhash(orig);
     entry = hashval % ctx->hash_size;
